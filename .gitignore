@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Claude
+CLAUDE.md
+claude/
+project_summary.md
+tasks.md
+
+# Git
+git_commands.md
+
+# Model weights
+models/
