@@ -1,0 +1,228 @@
+{
+  "$defs": {
+    "Dscsa": {
+      "properties": {
+        "t1_present": {
+          "title": "T1 Present",
+          "type": "boolean"
+        },
+        "t2_present": {
+          "title": "T2 Present",
+          "type": "boolean"
+        },
+        "t3_present": {
+          "title": "T3 Present",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "t1_present",
+        "t2_present",
+        "t3_present"
+      ],
+      "title": "Dscsa",
+      "type": "object"
+    },
+    "ExceptionType": {
+      "enum": [
+        "QTY_MISMATCH",
+        "MISSING_T3",
+        "EXPIRED_LOT",
+        "BROKEN_AGGREGATION",
+        "DUPLICATE_SERIAL",
+        "INVALID_NDC",
+        "RECALLED_LOT",
+        "NONE"
+      ],
+      "title": "ExceptionType",
+      "type": "string"
+    },
+    "Exception_": {
+      "description": "Named with a trailing underscore to avoid shadowing the builtin `Exception`.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/ExceptionType"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "recommended_resolution": {
+          "title": "Recommended Resolution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "severity",
+        "rationale",
+        "recommended_resolution"
+      ],
+      "title": "Exception_",
+      "type": "object"
+    },
+    "MessageFormat": {
+      "enum": [
+        "EPCIS_XML",
+        "X12_856",
+        "CSV"
+      ],
+      "title": "MessageFormat",
+      "type": "string"
+    },
+    "PackagingLevel": {
+      "enum": [
+        "unit",
+        "case",
+        "pallet"
+      ],
+      "title": "PackagingLevel",
+      "type": "string"
+    },
+    "Product": {
+      "properties": {
+        "ndc": {
+          "title": "Ndc",
+          "type": "string"
+        },
+        "gtin": {
+          "title": "Gtin",
+          "type": "string"
+        },
+        "product_name": {
+          "title": "Product Name",
+          "type": "string"
+        },
+        "lot_number": {
+          "title": "Lot Number",
+          "type": "string"
+        },
+        "expiration_date": {
+          "title": "Expiration Date",
+          "type": "string"
+        },
+        "serial_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Serial Numbers",
+          "type": "array"
+        },
+        "quantity": {
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "packaging_level": {
+          "$ref": "#/$defs/PackagingLevel"
+        },
+        "parent_serial": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Serial"
+        }
+      },
+      "required": [
+        "ndc",
+        "gtin",
+        "product_name",
+        "lot_number",
+        "expiration_date",
+        "serial_numbers",
+        "quantity",
+        "packaging_level"
+      ],
+      "title": "Product",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "critical",
+        "major",
+        "minor"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "TransactionType": {
+      "enum": [
+        "commissioning",
+        "shipping",
+        "receiving",
+        "aggregation"
+      ],
+      "title": "TransactionType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "message_id": {
+      "title": "Message Id",
+      "type": "string"
+    },
+    "message_format": {
+      "$ref": "#/$defs/MessageFormat"
+    },
+    "transaction_type": {
+      "$ref": "#/$defs/TransactionType"
+    },
+    "sender_gln": {
+      "title": "Sender Gln",
+      "type": "string"
+    },
+    "receiver_gln": {
+      "title": "Receiver Gln",
+      "type": "string"
+    },
+    "event_time": {
+      "title": "Event Time",
+      "type": "string"
+    },
+    "products": {
+      "items": {
+        "$ref": "#/$defs/Product"
+      },
+      "title": "Products",
+      "type": "array"
+    },
+    "dscsa": {
+      "$ref": "#/$defs/Dscsa"
+    },
+    "exceptions": {
+      "items": {
+        "$ref": "#/$defs/Exception_"
+      },
+      "title": "Exceptions",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "message_id",
+    "message_format",
+    "transaction_type",
+    "sender_gln",
+    "receiver_gln",
+    "event_time",
+    "products",
+    "dscsa",
+    "exceptions",
+    "confidence"
+  ],
+  "title": "CanonicalTransaction",
+  "type": "object"
+}
