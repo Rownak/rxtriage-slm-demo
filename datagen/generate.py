@@ -151,7 +151,8 @@ def generate_clean_bundle(rng: random.Random, ndc_df: pd.DataFrame) -> Canonical
         ]
 
     return CanonicalTransaction(
-        message_id=str(uuid.uuid4()),
+        # rng-derived UUID (not uuid4) so a seeded run reproduces the exact corpus
+        message_id=str(uuid.UUID(int=rng.getrandbits(128), version=4)),
         message_format=MessageFormat.EPCIS_XML,  # renderer (2.2) overwrites per output format
         transaction_type=transaction_type,
         sender_gln=_make_gln(rng),

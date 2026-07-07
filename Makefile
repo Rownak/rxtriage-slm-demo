@@ -7,7 +7,8 @@ test:
 	uv run pytest
 
 data:
-	@echo "TODO (Phase 1-2): reference data fetch + synthetic corpus generation"
+	uv run python -m datagen.assemble
+	uv run python -m datagen.format_chat
 
 train:
 	@echo "TODO (Phase 3): QLoRA fine-tuning"

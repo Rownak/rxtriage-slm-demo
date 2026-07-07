@@ -74,12 +74,17 @@ def inject_expired_lot(bundle: CanonicalTransaction, rng: random.Random) -> Cano
 
 
 def inject_broken_aggregation(
-    bundle: CanonicalTransaction, rng: random.Random
+    bundle: CanonicalTransaction, rng: random.Random, mode: str = "random"
 ) -> CanonicalTransaction:
     """Break the unit->case hierarchy: orphan a child OR remove one child.
 
     Only meaningful on aggregation bundles (the only kind with parent/child
     links); raises ValueError for anything else.
+
+    mode: "orphan" | "count" | "random". Corpus assembly (2.5) uses "count"
+    because the orphan defect lives only in the canonical JSON's parent_serial
+    and is structurally inexpressible in a rendered EPCIS AggregationEvent
+    (single parentID) — the raw message would carry no evidence of it.
     """
     txn = bundle.model_copy(deep=True)
     units, cases = _units_and_cases(txn)
@@ -87,7 +92,7 @@ def inject_broken_aggregation(
         raise ValueError("BROKEN_AGGREGATION requires an aggregation bundle with a case")
     case = cases[0]
 
-    if rng.random() < 0.5:
+    if mode == "orphan" or (mode == "random" and rng.random() < 0.5):
         # Orphan mode: point the first unit at a parent that isn't in the message.
         taken = {s for p in txn.products for s in p.serial_numbers}
         orphan = units[0]
