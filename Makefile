@@ -1,4 +1,4 @@
-.PHONY: setup data train serve eval demo test
+.PHONY: setup data train serve eval baselines demo test
 
 setup:
 	uv sync
@@ -16,8 +16,10 @@ train:
 serve:
 	@echo "TODO (Phase 4): vLLM serving + router"
 
-eval:
-	@echo "TODO (Phase 5): evaluation harness"
+# Phase 3.1: zero/few-shot Qwen2.5-3B (Ollama) + gpt-4o-mini baselines.
+# Requires `ollama pull qwen2.5:3b-instruct` and OPENAI_API_KEY in .env.
+eval baselines:
+	uv run python -m eval.run_baselines
 
 demo:
 	@echo "TODO (Phase 5): end-to-end raw message -> triaged exception demo"
