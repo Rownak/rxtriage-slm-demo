@@ -58,15 +58,17 @@ def load_model(cfg: dict, adapter_dir: str):
 def generate(model, tokenizer, messages: list[dict], max_new_tokens: int = 1024) -> str:
     # Drop the gold assistant turn; prompt the model to produce it.
     prompt_msgs = [m for m in messages if m["role"] != "assistant"]
+    # return_dict gives us the attention_mask too — pad_token == eos_token here,
+    # so without an explicit mask the model can't tell padding from a real EOS.
     inputs = tokenizer.apply_chat_template(
-        prompt_msgs, add_generation_prompt=True, return_tensors="pt"
+        prompt_msgs, add_generation_prompt=True, return_tensors="pt", return_dict=True
     ).to(model.device)
     with torch.no_grad():
         out = model.generate(
-            inputs, max_new_tokens=max_new_tokens, do_sample=False, temperature=None, top_p=None,
+            **inputs, max_new_tokens=max_new_tokens, do_sample=False, temperature=None, top_p=None,
             pad_token_id=tokenizer.pad_token_id,
         )
-    return tokenizer.decode(out[0][inputs.shape[1]:], skip_special_tokens=True)
+    return tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
 
 
 def main() -> None:
@@ -101,7 +103,10 @@ def main() -> None:
     print(f"  header EM    : {agg['header_exact_match_rate']:.1%}  (baseline 44.7%)")
     print(f"  hallucination: {agg['hallucination_rate']:.1%}")
 
-    out = Path(cfg["output_dir"]) / "val_eval.json"
+    # Write next to the adapter that was evaluated (e.g. .../hf/ or .../unsloth/),
+    # not the shared output_dir — otherwise back-to-back HF and Unsloth evals
+    # would overwrite each other's val_eval.json.
+    out = Path(adapter_dir).parent / "val_eval.json"
     out.write_text(json.dumps(agg, indent=2), encoding="utf-8")
     print(f"\nWrote {out}")
 
