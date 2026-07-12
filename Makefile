@@ -1,4 +1,4 @@
-.PHONY: setup data train serve eval baselines demo test
+.PHONY: setup data train train-unsloth train-eval serve eval baselines demo test
 
 setup:
 	uv sync
@@ -10,8 +10,21 @@ data:
 	uv run python -m datagen.assemble
 	uv run python -m datagen.format_chat
 
+# Phase 3.2: QLoRA fine-tune Qwen2.5-3B (4-bit, LoRA r=16). Config in
+# training/qwen3b_qlora.yaml. Runs the venv Python directly (NOT `uv run`): the
+# CUDA torch wheel is installed manually, and `uv run --group train` would
+# re-resolve and replace it with a CPU-only build. See training/README notes.
 train:
-	@echo "TODO (Phase 3): QLoRA fine-tuning"
+	.venv/Scripts/python -m training.train
+
+# Same QLoRA run via Unsloth's FastLanguageModel (faster/lower-VRAM). Needs
+# `uv pip install unsloth --torch-backend=auto` on top of the train group.
+train-unsloth:
+	.venv/Scripts/python -m training.train_unsloth
+
+# Acceptance check: fine-tuned adapter vs. base_zeroshot baseline on val.
+train-eval:
+	.venv/Scripts/python -m training.eval_val
 
 serve:
 	@echo "TODO (Phase 4): vLLM serving + router"

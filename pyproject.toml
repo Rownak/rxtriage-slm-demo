@@ -21,6 +21,33 @@ dependencies = [
 dev = [
     "pytest>=8.2",
 ]
+# Phase 3.2 QLoRA training stack. NOTE: install these with `uv pip install` (or
+# manually), NOT `uv sync --group train` / `uv run --group train` — the resolver
+# replaces the manually-installed CUDA torch wheel with a CPU-only build, which
+# silently disables the GPU. torch itself is installed separately from the
+# pytorch CUDA index:
+#   uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
+# transformers pinned to trl-compatible 4.x (avoids the 5.x API drift).
+# Versions below reflect what was validated on this box (RTX 4090 Laptop, cu130).
+train = [
+    "torch>=2.9",
+    "transformers>=4.55,<5",
+    "peft>=0.15",
+    "trl>=0.20",
+    "bitsandbytes>=0.45",
+    "datasets>=2.20",
+    "accelerate>=1.0",
+    "pyyaml>=6.0",
+]
+# Unsloth path (training/train_unsloth.py) — patched FastLanguageModel gives
+# faster/lower-VRAM QLoRA than the plain train group above. Same "install
+# manually, don't uv sync" caveat applies. Needs triton-windows on native
+# Windows (no official Triton wheel there):
+#   uv pip install unsloth --torch-backend=auto
+unsloth = [
+    "unsloth",
+    "triton-windows ; platform_system == 'Windows'",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
