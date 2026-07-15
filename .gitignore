@@ -217,14 +217,20 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# RxTriage generated data (see project_summary.md — reference data is cached
+# as parquet under data/ref/, corpus/checkpoints are regenerated, not committed)
+data/*
+!data/.gitkeep
+!data/ref/
+data/ref/*
+!data/ref/.gitkeep
+
+
 # Claude
-CLAUDE.md
 claude/
-project_summary.md
 tasks.md
+project_summary.md
+CLAUDE.md
 
 # Git
 git_commands.md
-
-# Model weights
-models/
