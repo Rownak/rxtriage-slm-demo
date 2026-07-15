@@ -225,6 +225,12 @@ data/*
 data/ref/*
 !data/ref/.gitkeep
 
+# Training run artifacts (checkpoints, LoRA adapters, metrics.csv) — large, regenerable.
+training/runs/
+
+# Unsloth's JIT-compiled kernel cache (regenerated on first import).
+unsloth_compiled_cache/
+
 
 # Claude
 claude/

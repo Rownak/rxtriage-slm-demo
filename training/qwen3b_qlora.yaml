@@ -1,0 +1,42 @@
+# Phase 3.2 — QLoRA config for Qwen2.5-3B-Instruct on a single 16GB GPU.
+# Every training knob lives here (CLAUDE.md Conventions). training/train.py reads
+# this file; override with `--config <path>`.
+
+model_name: Qwen/Qwen2.5-3B-Instruct
+output_dir: training/runs/qwen3b_qlora
+
+train_file: data/corpus/train_chat.jsonl
+val_file: data/corpus/val_chat.jsonl
+
+max_seq_len: 2048          # corpus p95 ~1050 tok; 2048 covers all but the longest tail
+seed: 42
+
+# 4-bit NF4 quantization (bitsandbytes) with bf16 compute — fits a 3B model +
+# LoRA + activations under 16GB when combined with gradient checkpointing.
+quant:
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# LoRA r=16 per the task; adapters on all attention + MLP projections.
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+train:
+  epochs: 1
+  per_device_batch: 1
+  grad_accum: 16           # effective batch = 16
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  weight_decay: 0.0
+  logging_steps: 10
+  eval_steps: 50
+  save_steps: 50
+  bf16: true
+  gradient_checkpointing: true
+  optim: paged_adamw_8bit
