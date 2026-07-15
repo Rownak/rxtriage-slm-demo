@@ -48,6 +48,22 @@ unsloth = [
     "unsloth",
     "triton-windows ; platform_system == 'Windows'",
 ]
+# Phase 3.4 AWQ quantization (training/quantize_awq.py). llmcompressor's resolver
+# wants a DIFFERENT torch/transformers pin than the `train` group above (and would
+# downgrade the training venv's CUDA torch if installed there) — so this group is
+# installed into a SEPARATE venv (`.venv-quant`), never `uv sync`'d into the main
+# one. Setup:
+#   uv venv .venv-quant
+#   uv pip install --python .venv-quant torch --index-url https://download.pytorch.org/whl/cu130
+#   uv pip install --python .venv-quant llmcompressor transformers datasets accelerate
+#   # llmcompressor's install silently downgrades torch to a CPU wheel; reinstall CUDA after:
+#   uv pip install --python .venv-quant torch==2.13.0+cu130 --index-url https://download.pytorch.org/whl/cu130 --reinstall-package torch
+quant = [
+    "llmcompressor",
+    "transformers",
+    "datasets",
+    "accelerate",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

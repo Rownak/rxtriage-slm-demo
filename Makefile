@@ -1,4 +1,4 @@
-.PHONY: setup data train train-unsloth train-eval serve eval baselines demo test
+.PHONY: setup data train train-unsloth train-eval merge quantize-awq smoke-awq serve eval baselines demo test
 
 setup:
 	uv sync
@@ -25,6 +25,21 @@ train-unsloth:
 # Acceptance check: fine-tuned adapter vs. base_zeroshot baseline on val.
 train-eval:
 	.venv/Scripts/python -m training.eval_val
+
+# Phase 3.4: merge the (Unsloth) LoRA adapter into fp16 safetensors.
+merge:
+	.venv/Scripts/python -m training.merge
+
+# AWQ (W4A16) export via llmcompressor, in the isolated .venv-quant env — see
+# pyproject.toml's `quant` group comment for setup (separate venv because
+# llmcompressor's resolver wants a different torch/transformers pin than
+# the training stack).
+quantize-awq:
+	.venv-quant/Scripts/python -m training.quantize_awq
+
+# Acceptance check: 20-sample schema-validity smoke test on the AWQ model.
+smoke-awq:
+	.venv-quant/Scripts/python -m training.smoke_awq
 
 serve:
 	@echo "TODO (Phase 4): vLLM serving + router"
